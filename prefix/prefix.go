@@ -78,39 +78,16 @@ func CheckPrefix(input string) string {
 		return ""
 	}
 
-	type MatchedPrefix struct {
-		Length int
-		Value  string
-	}
-	OutputChannel := make(chan MatchedPrefix)
-
 	// This function takes an input string, then it will return the longest prefix that matches with the begining of the input string
 	var output string
 	// cumulatively add characters from the begining of the input string, the word that has formed is then hashed, and the mak is checked against the hash key,
 	// if a value is found then return that.
 	for i := range input {
 		cumulativeSubString := input[:i] // if the input is"helloworld" then this variable grows to be "h", "he", "hel",... "helloworld" with each iterations
-
-		go func() {
-			defer close(OutputChannel)
-			hashSubString := util.GetMD5(cumulativeSubString)
-			valueStored, isFound := prefixHashMap[hashSubString]
-			if isFound {
-				var mp MatchedPrefix
-				mp.Length = len(hashSubString)
-				mp.Value = valueStored
-				OutputChannel <- mp
-			}
-		}()
-	}
-
-	//
-
-	// receive and append channel values
-	var maxLength int
-	for matchedPrefix := range OutputChannel {
-		if matchedPrefix.Length > maxLength {
-			output = matchedPrefix.Value
+		hashSubString := util.GetMD5(cumulativeSubString)
+		valueStored, isFound := prefixHashMap[hashSubString]
+		if isFound {
+			output = valueStored // this can also assign a csv to output
 		}
 	}
 
