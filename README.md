@@ -92,17 +92,12 @@ To clean up lets delete the docker image that was either downloaded from dockerh
 ```sh
 make docker-rmi
 ```
- 
 
 
-
-
-
-
-
-
-
-
-
-
-
+## 4 Kubernetes
+I have also included a kubernates manifest file. If applied, this will create all the necessary components autometically and you can start accessing the service by a loadbalancer's endpoint. 
+To apply the manifest execute the following command
+```sh
+kubectl apply -f kubernetes/prefix.yaml
+```
+Note: Make sure you have kubectl install and kubeconfig is point to a valid kubernetes cluster before execuiting the previous command

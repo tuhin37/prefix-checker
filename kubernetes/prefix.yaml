@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: prefix
-        image: fidays/prefix:1.0.0
+        image: fidays/prefix:latest
         ports:
         - containerPort: 5000
           name: api
