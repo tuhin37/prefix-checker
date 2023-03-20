@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prefix
+  labels:
+    name: prefix
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prefix-lb
+  namespace: prefix
+spec:
+  ports:
+  - name: api
+    port: 80
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: prefix
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prefix
+  namespace: prefix
+spec:
+  selector:
+    matchLabels:
+      app: prefix
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: prefix
+    spec:
+      containers:
+      - name: prefix
+        image: fidays/prefix:1.0.0
+        ports:
+        - containerPort: 5000
+          name: api
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "1024Mi"
+            cpu: "500m"

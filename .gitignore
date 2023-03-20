@@ -1,0 +1,9 @@
+# this is where all the project specific go libraries are locally present
+vendor/
+
+# only keep a sample wordlist in the repo
+prefix-wordlists/*
+!prefix-wordlists/sample-wordlist.txt
+
+# binary file 
+truecaller-prefix

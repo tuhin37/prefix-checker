@@ -12,11 +12,11 @@ import (
 
 var wORDLIST_FOLDER string = "./prefix-wordlists/"
 var prefixHashMap = make(map[string]string)
+var mut sync.Mutex
+var wg sync.WaitGroup
 
 func init() {
 	// This function finds all the wordlist files present in `prefix-wordlists` folder and loads them in a hash map
-
-	var wg sync.WaitGroup
 	// list all the files in `prefix-wordlists` folder
 	files, err := ioutil.ReadDir(wORDLIST_FOLDER)
 	if err != nil {
@@ -27,15 +27,15 @@ func init() {
 	for _, file := range files {
 		// only use files which have `.txt` extainsion and has some data
 		if !file.IsDir() && file.Name()[len(file.Name())-3:] == "txt" && file.Size() > 0 {
+			// for each file, call the function. go routine for each file is ineffective because then multiple routines will try to read write on the same resource 'map' at once
 			wg.Add(1)
-			// for each file, call the function // TODO: fork a new go routine for each file
-			go func(fname string) {
-				defer wg.Done()
-				file2hashmap(fname)
+			go func(filename string) {
+				file2hashmap(filename)
+				wg.Done()
 			}(file.Name())
 		}
 	}
-	wg.Wait() // wait for the goroutines to finish before moving on
+	wg.Wait() // wait for all the file loading to finisg
 }
 
 func file2hashmap(filename string) {
@@ -60,13 +60,16 @@ func file2hashmap(filename string) {
 		// hash a word and insert it to the map
 		hash := util.GetMD5(fileScanner.Text())
 		// collision case detection
+		mut.Lock()
 		oldString, isFound := prefixHashMap[hash]
-		if isFound {
+		// md5 collision and new word is not a duplicate and the new word is not an eempty string
+		if isFound && fileScanner.Text() != oldString && fileScanner.Text() != "" {
 			// append two values in comma seperated format
 			prefixHashMap[hash] = util.AppendCSV(oldString, fileScanner.Text())
 			continue
 		}
 		prefixHashMap[hash] = fileScanner.Text()
+		mut.Unlock()
 	}
 }
 
